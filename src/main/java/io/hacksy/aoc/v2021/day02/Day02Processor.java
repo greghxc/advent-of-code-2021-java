@@ -28,7 +28,7 @@ public class Day02Processor {
             var cmd = split[0];
             var amount = Integer.parseInt(split[1]);
 
-            return switch (split[0]) {
+            return switch (cmd) {
                 case "forward" -> new Position(pos.horizontal + amount, pos.vertical + (pos.aim * amount), pos.aim);
                 case "up" -> new Position(pos.horizontal, pos.vertical, pos.aim - amount);
                 case "down" -> new Position(pos.horizontal, pos.vertical, pos.aim + amount);
