@@ -25,33 +25,36 @@ public class Day04Processor {
     private Integer runGame(List<String> input, Function<List<Result>, Result> winCondition) {
         var calledNumbers = parseCalledNumbers(input);
         var cards = parseBingoCards(input);
-        var winningResult = winCondition.apply(cards.map(c -> runGameForCard(c, calledNumbers)));
-        return score(winningResult, calledNumbers);
+        var winningResult = winCondition.apply(cards.map(c -> c.runGame(calledNumbers)));
+        return winningResult.score(calledNumbers);
     }
 
-    private Result runGameForCard(BingoCard bingoCard, List<Integer> calledNumbers) {
-        return calledNumbers.foldLeft(new Result(bingoCard, -1), (result, calledNumber) -> {
-            if (isBingo(result.bingoCard())) { return result; }
-            return new Result(markNumber(calledNumber, result.bingoCard()), result.rounds() + 1);
-        });
-    }
+    record BingoCard(int marks, Map<Integer, Integer> positionMap) {
+        BingoCard markNumber(int number) {
+            return positionMap.get(number)
+                    .map(position -> new BingoCard(marks() | 1 << position, positionMap()))
+                    .getOrElse(this);
+        }
 
-    private BingoCard markNumber(int number, BingoCard bingoCard) {
-        return bingoCard.positionMap.get(number)
-                .map(position -> new BingoCard(bingoCard.marks() | 1 << position, bingoCard.positionMap()))
-                .getOrElse(bingoCard);
-    }
+        boolean isBingo() {
+            return bingoMarks
+                    .find(bingoMask -> (marks() & bingoMask) == bingoMask)
+                    .isDefined();
+        }
 
-    private boolean isBingo(BingoCard bingoCard) {
-        return bingoMarks
-                .find(bingoMask -> (bingoCard.marks() & bingoMask) == bingoMask)
-                .isDefined();
+        Result runGame(List<Integer> calledNumbers) {
+            return calledNumbers.foldLeft(new Result(this, -1), (result, calledNumber) -> {
+                if (result.bingoCard.isBingo()) { return result; }
+                return new Result(result.bingoCard.markNumber(calledNumber), result.rounds() + 1);
+            });
+        }
     }
-
-    private int score(Result result, List<Integer> calledNumbers) {
-        return result.bingoCard.positionMap().keySet()
-                .removeAll(calledNumbers.slice(0, result.rounds() + 1)
-                .toSet()).sum().intValue() * calledNumbers.get(result.rounds());
+    record Result(BingoCard bingoCard, int rounds) {
+        int score(List<Integer> calledNumbers) {
+            return bingoCard.positionMap().keySet()
+                    .removeAll(calledNumbers.slice(0, rounds() + 1).toSet())
+                    .sum().intValue() * calledNumbers.get(rounds());
+        }
     }
 
     // parsing
@@ -68,8 +71,4 @@ public class Day04Processor {
                 .map(orderedInts -> new BingoCard(0, orderedInts.zipWithIndex().toMap(t -> t)))
                 .toList();
     }
-
-    // structs
-    record BingoCard(int marks, Map<Integer, Integer> positionMap) {}
-    record Result(BingoCard bingoCard, int rounds) {}
 }
