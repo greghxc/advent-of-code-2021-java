@@ -25,7 +25,7 @@ public class Day04Processor {
     private Integer runGame(List<String> input, Function<List<Result>, Result> winCondition) {
         var calledNumbers = parseCalledNumbers(input);
         var cards = parseBingoCards(input);
-        var winningResult = winCondition.apply(cards.map(c -> c.runGame(calledNumbers)));
+        var winningResult = winCondition.apply(cards.map(c -> c.finalResultFor(calledNumbers)));
         return winningResult.score(calledNumbers);
     }
 
@@ -42,13 +42,14 @@ public class Day04Processor {
                     .isDefined();
         }
 
-        Result runGame(List<Integer> calledNumbers) {
+        Result finalResultFor(List<Integer> calledNumbers) {
             return calledNumbers.foldLeft(new Result(this, -1), (result, calledNumber) -> {
                 if (result.bingoCard.isBingo()) { return result; }
                 return new Result(result.bingoCard.markNumber(calledNumber), result.rounds() + 1);
             });
         }
     }
+
     record Result(BingoCard bingoCard, int rounds) {
         int score(List<Integer> calledNumbers) {
             return bingoCard.positionMap().keySet()
