@@ -4,7 +4,6 @@ import io.vavr.collection.List;
 import io.vavr.collection.Map;
 
 import java.util.Comparator;
-import java.util.function.Function;
 
 public class Day04Processor {
     private static final List<Integer> bingoMarks = List.of(
@@ -15,18 +14,19 @@ public class Day04Processor {
     ).map(s -> s.replace(" ", "")).map(s -> Integer.parseInt(s, 2));
 
     Integer partOne(List<String> input) {
-        return runGame(input, results -> results.minBy(Comparator.comparing(b -> b.rounds)).get());
+        var calledNumbers = parseCalledNumbers(input);
+        return parseBingoCards(input)
+                .map(c -> c.finalResultFor(calledNumbers))
+                .minBy(Comparator.comparing(Result::rounds))
+                .get().score(calledNumbers);
     }
 
     Integer partTwo(List<String> input) {
-        return runGame(input, results -> results.maxBy(Comparator.comparing(b -> b.rounds)).get());
-    }
-
-    private Integer runGame(List<String> input, Function<List<Result>, Result> winCondition) {
         var calledNumbers = parseCalledNumbers(input);
-        var cards = parseBingoCards(input);
-        var winningResult = winCondition.apply(cards.map(c -> c.finalResultFor(calledNumbers)));
-        return winningResult.score(calledNumbers);
+        return parseBingoCards(input)
+                .map(c -> c.finalResultFor(calledNumbers))
+                .maxBy(Comparator.comparing(Result::rounds))
+                .get().score(calledNumbers);
     }
 
     record BingoCard(int marks, Map<Integer, Integer> positionMap) {
