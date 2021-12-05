@@ -62,8 +62,9 @@ public class Day04Processor {
     private List<BingoCard> parseBingoCards(List<String> input) {
         return input.slice(1, input.length())
                 .filter(line -> !line.isBlank())
-                .zipWithIndex().groupBy(t -> t._2 / 5).map(t -> t._2.map(tt -> tt._1))
-                .map(lines -> lines.flatMap(line -> List.of(line.trim().split("\\s+"))).map(Integer::parseInt))
+                .flatMap(line -> List.of(line.trim().split("\\s+")))
+                .map(Integer::parseInt)
+                .zipWithIndex().groupBy(t -> t._2 / 25).map(t -> t._2.map(tt -> tt._1))
                 .map(orderedInts -> new BingoCard(0, orderedInts.zipWithIndex().toMap(t -> t)))
                 .toList();
     }
