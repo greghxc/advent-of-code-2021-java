@@ -23,16 +23,12 @@ public class Day05Processor {
             var currentCoord = cloud.start();
             coverage = coverage.put(currentCoord, coverage.getOrElse(currentCoord, 0) + 1);
             while (!currentCoord.equals(cloud.stop())) {
-                if (currentCoord.x() != cloud.stop().x()) {
-                    var diff = cloud.stop().x() - currentCoord.x();
-                    var increment = diff / Math.abs(diff);
-                    currentCoord = new Coordinate(currentCoord.x() + increment, currentCoord.y());
-                }
-                if (currentCoord.y() != cloud.stop().y()) {
-                    var diff = cloud.stop().y() - currentCoord.y();
-                    var increment = diff / Math.abs(diff);
-                    currentCoord = new Coordinate(currentCoord.x(), currentCoord.y() + increment);
-                }
+                var xDiff = cloud.stop().x() - currentCoord.x();
+                var yDiff = cloud.stop().y() - currentCoord.y();
+                currentCoord = new Coordinate(
+                        xDiff == 0 ? currentCoord.x() : currentCoord.x() + (xDiff / Math.abs(xDiff)),
+                        yDiff == 0 ? currentCoord.y() : currentCoord.y() + (yDiff / Math.abs(yDiff))
+                );
                 coverage = coverage.put(currentCoord, coverage.getOrElse(currentCoord, 0) + 1);
             }
         }
