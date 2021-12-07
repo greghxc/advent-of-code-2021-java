@@ -30,7 +30,7 @@ public class Day06Processor {
     Long fishAndSpawnCountAfter(int days) {
         if (results.containsKey(days)) { return results.get(days).get(); }
         var total = Stream.range(0, days)
-                .filter(i -> i - 8 >= 0 && (i - 8) % 7 == 1)
+                .filter(i -> (i - 8) % 7 == 1)
                 .map(i -> fishAndSpawnCountAfter(days - i))
                 .sum().longValue() + 1L;
         results = results.put(days, total);
